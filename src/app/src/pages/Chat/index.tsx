@@ -1,6 +1,7 @@
+import { type Scene } from '@@/types'
 import React, { useCallback, useEffect, type FC } from 'react'
 import { useParams } from 'react-router-dom'
-import Core, { type Scene } from './Core'
+import Core from './Core'
 import s from './chat.module.styl'
 
 interface NewtabWarpProps {

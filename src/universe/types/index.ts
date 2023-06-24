@@ -29,3 +29,5 @@ export interface CorePageData {
   }
 }
 export { Bing }
+
+export type Scene = 'newtab' | 'popup' | 'iframe' | undefined
