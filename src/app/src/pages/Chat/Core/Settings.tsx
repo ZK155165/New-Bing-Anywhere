@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react'
 import useConfig, { type Config } from '@/hooks/useConfig'
-import { Form, Modal, Radio, message, Select, Tooltip } from 'antd'
-
-import s from '../chat.module.styl'
+import s from '@/pages/Chat/chat.module.styl'
+import { Form, Modal, Radio, Select, Tooltip, message } from 'antd'
+import React, { useEffect } from 'react'
 
 const App: React.FC<{
   open: boolean

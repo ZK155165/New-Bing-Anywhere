@@ -6,7 +6,7 @@ import s from '../chat.module.styl'
 // import Article from './Article'
 // import Footer from './Footer'
 // import Header from './Header'
-// import Settings from './Settings'
+import Settings from './Settings'
 
 export default () => {
   const [config] = useConfig()
@@ -23,7 +23,7 @@ export default () => {
   return (
     <>
       1111111
-      {/* <Settings
+      <Settings
         open={openSettings}
         onCancel={() => {
           setOpenSettings(false)
@@ -32,6 +32,7 @@ export default () => {
           }, 100)
         }}
       />
+      {/*
       <div className={[s.wrap, s[config.conversationStyle?.toLowerCase()]].filter(Boolean).join(' ')} style={isPopup ? popupCss : {}}>
         <Header />
       </div>
