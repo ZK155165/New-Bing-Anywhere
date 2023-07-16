@@ -1,9 +1,9 @@
-import { version as pkgVersion, repository } from '../../package.json'
-import { FULL_VERSION, MAIN_VERSION } from './constants'
-import { type Bing } from './types'
+import { FULL_VERSION, GOOGLE_DOMAINS, MAIN_VERSION } from '@@/constants'
+import { type Bing } from '@@/types'
+import { version as pkgVersion, repository } from '../../../package.json'
 
-export const checkIsGoogle = () => {
-  return location.hostname.includes('google')
+export const checkIsGoogle = (hostname = location.hostname) => {
+  return GOOGLE_DOMAINS.includes(hostname.replace(/^www\./, ''))
 }
 export const ls = {
   set: async <T = any>(key: string, value: T): Promise<void> => {
@@ -136,6 +136,7 @@ export interface Config {
   showRelease: boolean
   triggerMode: 'Always' | 'Questionmark' | 'Manually'
   conversationStyle: Bing.ConversationStyle
+  'X-Forwarded-For'?: string
 }
 export const getConfig = async (): Promise<Config> => {
   const config = (await chrome.storage.sync.get(CONFIG_KEY))[CONFIG_KEY]
@@ -147,6 +148,7 @@ export const getConfig = async (): Promise<Config> => {
     showRelease: true,
     triggerMode: 'Always',
     conversationStyle: 'Balanced',
+    'X-Forwarded-For': undefined,
     ...config
   }
 }
@@ -207,7 +209,7 @@ export const callBackground = async <T = any>(method: string, args: any[] = []):
   })
 }
 
-export const localCache = (() => {
+export const localCache = /* @__PURE__ */ (() => {
   const v = 'v1'
   return {
     get: async <T = any>(key: string): Promise<null | T> => {
@@ -251,14 +253,14 @@ export const toDataUrl = async (url: string): Promise<string> => {
 const userAgent = navigator.userAgent
 const userAgentData = (navigator as any).userAgentData
 
-export const isMac = userAgent.includes('Macintosh')
-export const isFirefox = userAgent.includes('Firefox')
-export const isEdge = userAgent.includes('Edg/')
-export const isBrave = userAgentData?.brands.findIndex((item) => item.brand === 'Brave') > -1
-export const isChinese = checkIsChinese()
-export const isSimpleChinese = checkIsSimpleChinese()
-export const isCanary: boolean = !!globalThis.__NBA_isCanary
-export const version: string = isCanary ? `0.${pkgVersion}` : pkgVersion
+export const isMac = /* @__PURE__ */ userAgent.includes('Macintosh')
+export const isFirefox = /* @__PURE__ */ userAgent.includes('Firefox')
+export const isEdge = /* @__PURE__ */ userAgent.includes('Edg/')
+export const isBrave = /* @__PURE__ */ userAgentData?.brands.findIndex((item) => item.brand === 'Brave') > -1
+export const isChinese = /* @__PURE__ */ checkIsChinese()
+export const isSimpleChinese = /* @__PURE__ */ checkIsSimpleChinese()
+export const isCanary: boolean = /* @__PURE__ */ !!globalThis.__NBA_isCanary
+export const version: string = /* @__PURE__ */ isCanary ? `0.${pkgVersion}` : pkgVersion
 
 export const genUA = () => {
   let ua = userAgent
@@ -280,14 +282,17 @@ export const genIssueUrl = async (extra?: Record<string, string | null | undefin
     let finalUrl: string = url
     let comment =
       'Please write your comment ABOVE this line, provide as much detailed information and screenshots as possible.' +
+      'Please confirm that you have read the #8 https://github.com/haozi/New-Bing-Anywhere/issues/8.' +
       'The UA may not necessarily reflect your actual browser and platform, so please make sure to indicate them clearly.'
     if (isChinese) {
-      comment = '请在此行上方发表您的讨论。详尽的描述和截图有助于我们定位问题，UA 不一定真实反映您的浏览器和平台，请备注清楚'
+      comment =
+        '请在此行上方发表您的讨论。请确认已经阅读了FAQ(https://github.com/haozi/New-Bing-Anywhere/issues/8)，详尽的描述和截图有助于我们定位问题，描述不清的问题会被关闭，UA 不一定真实反映您的浏览器和平台，请备注清楚'
     }
 
     const body =
       ' \n\n\n\n' +
       `<!--  ${comment} -->\n` +
+      '<pre>\n' +
       Object.entries<string>({
         Version: `${version}${isCanary ? ' (Canary)' : ''} `,
         UA: navigator.userAgent,
@@ -299,11 +304,54 @@ export const genIssueUrl = async (extra?: Record<string, string | null | undefin
         .map(([key, val]) => {
           return val ? `${key}: ${val}` : ''
         })
-        .join('\n')
-
+        .join('\n') +
+      '</pre>'
     finalUrl += encodeURIComponent(body.slice(0, 2000))
     return finalUrl
   } catch {
     return repositoryUrl
   }
+}
+
+export const getURL = (url: string = '', base?: string): URL => {
+  try {
+    return new URL(url, base)
+  } catch (e) {
+    // console.error(e)
+    return {
+      searchParams: {
+        get: () => null
+      }
+    } as any
+  }
+}
+
+export const getURLSearchParams = (url: string): URLSearchParams => {
+  try {
+    return new URLSearchParams(url)
+  } catch {
+    return {
+      get: () => null
+    } as any
+  }
+}
+
+export const openPage = async (url: string): Promise<chrome.tabs.Tab> => {
+  const tabs = await chrome.tabs.query({ currentWindow: true })
+
+  const urlObj = getURL(url)
+  let tab = tabs.find((tab) => tab.url?.startsWith(urlObj.origin))
+
+  if (tab == null) {
+    tab = await chrome.tabs.create({ url })
+  } else {
+    await Promise.all(
+      [
+        chrome.tabs.move(tab.id!, { index: tabs.length - 1 }),
+        tab.url !== url && chrome.tabs.update(tab.id!, { url }),
+        chrome.tabs.update(tab.id!, { active: true, url: tab.url !== url ? url : undefined })
+      ].filter(Boolean)
+    )
+  }
+  return tab
 }

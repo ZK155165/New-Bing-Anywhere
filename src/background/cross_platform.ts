@@ -1,10 +1,9 @@
 import { BAND_MKTS, BING } from '@@/constants'
-import { isCanary, registryListener, version, getConfig } from '@@/utils'
-
+import { getConfig, getURLSearchParams, isCanary, openPage, registryListener, version } from '@@/utils'
 import { repository } from '../../package.json'
 import initContextMenu from './context_menus'
 import listeners from './listeners'
-import { getURLSearchParams, openPage, setCookie } from './utils'
+import { setCookie } from './utils'
 
 export default () => {
   initContextMenu()
@@ -89,6 +88,32 @@ export default () => {
             {
               url: BING,
               name: '_RwBf',
+              domain: '.bing.com',
+              httpOnly: true,
+              value: valueObj.toString()
+            },
+            cookie
+          )
+        }
+      )
+
+      chrome.cookies.get(
+        {
+          name: 'ANON',
+          url: BING
+        },
+        (cookie) => {
+          const value = cookie?.value
+          if (!value) return
+
+          const valueObj = getURLSearchParams(value)
+
+          valueObj.delete('A')
+
+          setCookie(
+            {
+              url: BING,
+              name: 'ANON',
               domain: '.bing.com',
               httpOnly: true,
               value: valueObj.toString()

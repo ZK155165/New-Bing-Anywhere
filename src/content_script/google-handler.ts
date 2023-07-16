@@ -1,14 +1,12 @@
 import { getConfig } from '@@/utils'
+import $ from 'jquery'
 import { $w, openUrlInSameTab } from './utils'
 
-export default async ($: ZeptoStatic) => {
+export default async () => {
   const config = await getConfig()
-
   if (!config.showBingButtonOnGoogle) return
-  if (!(location.href.startsWith('https://www.google.com/search?') || location.href.startsWith('https://www.google.com.hk/search?'))) {
-    return
-  }
-
+  if (location.pathname !== '/search') return
+  const isRtl = document.documentElement.dir === 'rtl'
   $w('[action="/search"]').then((form) => {
     if (!form) return
     const $form = $(form)
@@ -17,15 +15,22 @@ export default async ($: ZeptoStatic) => {
 
     const $a = $(`
       <a href="https://www.bing.com/search?q=Bing+AI&showconv=1" rel="noopener noreferrer nofollow" target="bing" title="search with New Bing">
-        <img src="${chrome.runtime.getURL('images/bing-chat.svg')}" style="display: block; width: 24px;" alt="bing" />
+        <img src="${chrome.runtime.getURL('images/bing-chat.png')}" style="display: block; width: 20px; height: 20px" alt="bing" />
       </a>`).css({
       width: '40px',
       display: 'flex',
       position: 'relative',
-      'z-index': 999,
+      'z-index': 900,
       cursor: 'pointer',
       'justify-content': 'center',
-      margin: '0 10px 0 -10px'
+      'align-items': 'center',
+      margin: '-2px 10px 0 -10px',
+      ...(isRtl
+        ? {
+            marginInlineStart: '-10px',
+            marginInlineEnd: '10px'
+          }
+        : null)
     })
 
     $submit.after($a)

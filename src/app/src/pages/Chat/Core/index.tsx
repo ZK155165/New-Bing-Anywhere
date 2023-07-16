@@ -3,10 +3,10 @@ import { type Scene } from '@@/types'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import s from '../chat.module.styl'
-import Article from './Article'
-import Footer from './Footer'
-import Header from './Header'
-import Settings from './Settings'
+// import Article from './Article'
+// import Footer from './Footer'
+// import Header from './Header'
+// import Settings from './Settings'
 
 export default () => {
   const [config] = useConfig()
@@ -22,7 +22,8 @@ export default () => {
   }
   return (
     <>
-      <Settings
+      1111111
+      {/* <Settings
         open={openSettings}
         onCancel={() => {
           setOpenSettings(false)
@@ -38,7 +39,7 @@ export default () => {
         <hr />
         <Article />
       </main>
-      <Footer />
+      <Footer /> */}
     </>
   )
 }

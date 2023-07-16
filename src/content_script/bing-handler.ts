@@ -1,7 +1,8 @@
 import { callBackground, escapeHtml, getConfig, isEdge, setConfig } from '@@/utils'
+import $ from 'jquery'
 import { $w, mutationConfig, openUrlInSameTab } from './utils'
 
-export default async ($: ZeptoStatic) => {
+export default async () => {
   if (!isEdge) {
     const document = window.document
     const s = document.createElement('script')
@@ -9,6 +10,7 @@ export default async ($: ZeptoStatic) => {
     s.onload = s.remove
     document.documentElement.appendChild(s)
   }
+  const isRtl = document.documentElement.dir === 'rtl'
 
   $(() => {
     ;(async () => {
@@ -63,12 +65,12 @@ export default async ($: ZeptoStatic) => {
       })
       const close = () => {
         $div.remove()
-        $body.css('padding-top', null)
+        $body.css('padding-top', '')
       }
       const $a = $(
         `<a style="color:#fff; background:url(${chrome.runtime.getURL(
           'images/bing_32x32.png'
-        )}) no-repeat left 0; background-size: 12px; padding-left: 20px" href="${
+        )}) no-repeat left 0; background-size: 12px; padding-inline-start: 20px" href="${
           note.html_url
         }" target="_blank" rel="noopener noreferrer nofollow">${note.title}</a>`
       ).on('click', close)
@@ -91,7 +93,7 @@ export default async ($: ZeptoStatic) => {
     if (!config.showGoogleButtonOnBing) return
 
     const $q = $('#sb_form_q')
-    const searchQuery: string = $q.val()
+    const searchQuery: string = $q.val() as string
 
     const $a = $(`
       <a href="https://www.google.com/search?q=${encodeURIComponent(
@@ -107,7 +109,7 @@ export default async ($: ZeptoStatic) => {
       display: 'inline-block',
       'z-index': 999,
       transition: 'all .3s',
-      transform: 'translate3d(835px, 13px, 0px)',
+      transform: `translate3d(${835 - (isRtl ? 925 : 0)}px, 13px, 0px)`,
       'will-change': 'transform',
       cursor: 'pointer'
     })
@@ -122,7 +124,7 @@ export default async ($: ZeptoStatic) => {
       //   val = ($('#searchbox').val() ?? '').trim()
       // }
       if (!val) {
-        val = $q.val().trim()
+        val = String($q.val()).trim()
       }
       const url = `https://www.google.com/search?q=${encodeURIComponent(val)}`
       $this.attr('href', url)
@@ -148,17 +150,17 @@ export default async ($: ZeptoStatic) => {
         }
 
         $a.css({
-          transform: `translate3d(${left}px, 15px, 0)`
+          transform: `translate3d(${left - (isRtl ? 925 : 0)}px, 15px, 0)`
         })
       } else {
         $a.css({
-          transform: 'translate3d(835px, 15px, 0)'
+          transform: `translate3d(${835 - (isRtl ? 925 : 0)}px, 15px, 0)`
         })
       }
 
       if (!isNewBingOpen && $('.b_searchboxForm').hasClass('as_rsform')) {
         $a.css({
-          transform: 'translate3d(1155px, 15px, 0)'
+          transform: `translate3d(${1155 - (isRtl ? -99999 : 0)}px, 15px, 0)`
         })
       }
     }

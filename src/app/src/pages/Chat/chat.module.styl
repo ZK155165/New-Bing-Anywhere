@@ -56,9 +56,9 @@ $background-precise = linear-gradient(90deg, rgb(236, 242, 245) 0%, 1.3089%, rgb
 
     h1 {
       flex: 1
-      margin-left: 0.5em
       font-weight: 700
       font-size: 18px
+      margin-inline-start: 0.5em
     }
 
     .btns {
@@ -99,7 +99,7 @@ $background-precise = linear-gradient(90deg, rgb(236, 242, 245) 0%, 1.3089%, rgb
   }
 
   ul, ol {
-    padding-left: 15px
+    padding-inline-start: 15px
 
     li {
       margin: 0.4rem
@@ -163,5 +163,58 @@ $background-precise = linear-gradient(90deg, rgb(236, 242, 245) 0%, 1.3089%, rgb
 
   a:hover {
     text-decoration: underline
+  }
+}
+
+.error {
+  em {
+    font-weight: bold
+  }
+
+  padding: 10px
+  // background: #f8e3eb
+  border: 0.5px solid #f8e3eb
+  border-radius: 8px
+  background-color: #fff2f0
+  color: #333
+
+  & [class*='ant-btn'] span {
+    color: #fff !important
+  }
+}
+
+[color-scheme='dark'] {
+  color: #fff
+
+  .wrap {
+    background: #000
+
+    hr {
+      background-color: #222
+    }
+  }
+
+  [class*='ant-btn'] {
+    color: #8ab4f8
+  }
+
+  main {
+    a {
+      color: #8ab4f8
+
+      &:visited {
+        color: #c58af9
+      }
+
+      &:hover {
+        text-decoration: underline
+      }
+    }
+  }
+
+  .more {
+    a {
+      background: #202124
+    }
   }
 }

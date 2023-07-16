@@ -7,6 +7,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import sortPackageJson from 'sort-package-json'
 import pkg from '../package.json'
+import { GOOGLE_DOMAINS } from '../src/universe/constants'
 import staticRules from './static_rules'
 
 const root = path.join(__dirname, '..')
@@ -17,9 +18,7 @@ const edgeDir = path.join(dist, 'edge')
 const firefoxDir = path.join(dist, 'firefox')
 
 const isDev = process.argv[2] === 'dev'
-const external = [
-  ...new Set(['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'].map((o) => Object.keys(pkg[o] ?? {})).flat())
-]
+const external = [...new Set(['devDependencies', 'optionalDependencies', 'peerDependencies'].map((o) => Object.keys(pkg[o] ?? {})).flat())]
 
 const sortManifestJSON = (json: object) => {
   return sortPackageJson(json, {
@@ -37,10 +36,11 @@ const buildFile = async (input: string, output: string, extraBuildOptions?: Buil
       minify: !isDev,
       sourcemap: isDev ? 'inline' : (false as any),
       plugins: [svgrPlugin(), stylePlugin()],
+      treeShaking: true,
       ...extraBuildOptions
     }
     if (!isDev) {
-      await esbuild.build(buildOptions)
+      await esbuild.build({ ...buildOptions, drop: ['console', 'debugger'] })
       return
     }
 
@@ -70,7 +70,17 @@ const buildChromiumBase = async () => {
     web_accessible_resources: [
       {
         resources: ['inject.js', 'app/*', 'images/*'],
-        matches: ['https://www.bing.com/*', 'https://www.google.com/*', 'https://www.google.com.hk/*']
+        matches: [
+          'https://www.bing.com/*',
+          'https://www.baidu.com/*',
+          'https://www.so.com/*',
+          'https://duckduckgo.com/*',
+          'https://www.ecosia.org/*',
+          'https://*.yandex.com/*',
+          'https://search.brave.com/*',
+          'https://search.naver.com/*',
+          ...GOOGLE_DOMAINS.map((google) => `https://www.${google}/*`)
+        ]
       }
     ],
     options_ui: {
@@ -103,8 +113,16 @@ const buildChromiumBase = async () => {
       // '<all_urls>',
       'http://*.bing.com/*',
       'https://*.bing.com/*',
-      'https://www.google.com/search?*',
-      'https://www.google.com.hk/search?*'
+      'https://www.baidu.com/*',
+      'https://www.so.com/*',
+      'https://duckduckgo.com/*',
+      'https://www.ecosia.org/*',
+      'https://*.yandex.com/*',
+      'https://search.brave.com/*',
+      'https://search.naver.com/*',
+      // '*://*/*',
+      'https://*.openai.com/*',
+      ...GOOGLE_DOMAINS.map((google) => `https://www.${google}/search?*`)
     ],
     key: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxbxQeSdmZpNR6r8FWS5Xviv8NIKPEB1+UpOLsRJHnroPCOSvgZG9u5hbI2ZN0I7DRBXLO3NCxrqcYIp2d62YCzOO4nfKSwnGlAPMFSYw7jyHq0ITjfGIWkql2GsiwRr6MAEM2ktGthDV3iBuL2lRIYfcIOdIUOccxT+2FpDSsncQUHKxjFEisMExX/AAMSNy79PqDUu/5lbEo8zWNlWza5mD69QRU3fK5WGjqrS5naGJ46kPSbE5WU3NPOtHjldPgRVMTbrg6X2GGDGKPp3ISoqj/joNKBNqsMMKn5SURjvqzvzAyVup1/j9XFQ5bGnZYnJTIZ5mvR0wWXnlgf7+RQIDAQAB',
     // content_security_policy: {
@@ -115,8 +133,18 @@ const buildChromiumBase = async () => {
 
     content_scripts: [
       {
-        matches: ['https://www.bing.com/*', 'https://www.google.com/search?*', 'https://www.google.com.hk/search?*'],
-        js: ['zepto.min.js', 'content_script.js'],
+        matches: [
+          'https://www.bing.com/*',
+          'https://www.baidu.com/*',
+          'https://www.so.com/*',
+          'https://duckduckgo.com/*',
+          'https://www.ecosia.org/*',
+          'https://*.yandex.com/*',
+          'https://search.brave.com/*',
+          'https://search.naver.com/*',
+          ...GOOGLE_DOMAINS.map((google) => `https://www.${google}/search?*`)
+        ],
+        js: ['content_script.js'],
         run_at: 'document_start'
       }
     ],
@@ -125,13 +153,13 @@ const buildChromiumBase = async () => {
       32: 'images/bing_32x32.png',
       48: 'images/bing_48x48.png',
       128: 'images/bing_128x128.png'
+    },
+    action: {
+      default_popup: 'app/index.html#/popup',
+      default_title: 'New Bing Anywhere'
     }
-    // action: {
-    //   default_popup: 'app/index.html#/chat/popup',
-    //   default_title: 'New Bing Anywhere'
-    // }
   }
-  fs.outputJSONSync(path.join(chromiumDir, 'manifest.json'), sortManifestJSON(manifest))
+  fs.outputJSONSync(path.join(chromiumDir, 'manifest.json'), sortManifestJSON(manifest), isDev ? { spaces: 2 } : undefined)
 
   // https://developer.chrome.com/docs/webstore/i18n/
   ;['en', 'zh_CN', 'zh_TW', 'ru'].forEach((locale) => {
@@ -165,7 +193,8 @@ const buildChromiumCanary = async () => {
       version: `0.${pkg.version}`,
       homepage_url: 'https://github.com/haozi/New-Bing-Anywhere/tree/canary',
       key: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp2asctK5nmilg+tZyT74rpsgyfAYWl5pRKsoZDMxj97dwu5YMH1AXoE1ItbFCH8ysjWfsPbYfC0fhFcRljCroPxAJoSl73RRX2rFV8g8aSG101QTYTc2tUvw7xPLk0NS9X4bi/zZmlCHmcoxiOaslN8chs3JgOEQSJROu5PrGpahC9SzZh77iQEtOsYR1grEyuRioFi+x+end1X1tMwaJ4/yYTK4jj9PlFnOKDBFYVhGKCHaWkP2Wv4PPabl/nzUo+l/W0B7fkbaSxI8gir42YzA+OJcPQ/H2UMqtROZxqR847uXsAnB5PfPdo4tT5qUfPd16btsbIr9t6YAMMD0mQIDAQAB'
-    })
+    }),
+    isDev ? { spaces: 2 } : undefined
   )
 }
 
@@ -178,7 +207,8 @@ const buildEdge = async () => {
       ...chromeManifest,
       name: `${pkg.extensionName} (Edge)`,
       key: undefined
-    })
+    }),
+    isDev ? { spaces: 2 } : undefined
   )
 
   fs.outputJSONSync(
@@ -206,12 +236,11 @@ const buildFireFox = async () => {
       background: {
         scripts: ['background.js']
       },
-      host_permissions: ['<all_urls>'],
+      // host_permissions: ['<all_urls>'],
       permissions: chromeManifest.permissions.filter((item) => !['declarativeNetRequest'].includes(item)).concat('webRequestBlocking'),
       declarative_net_request: undefined,
       // web_accessible_resources: undefined,
-      // host_permissions: undefined,
-      content_scripts: undefined,
+      // content_scripts: undefined,
       options_ui: undefined,
       key: undefined,
       browser_specific_settings: {
@@ -220,13 +249,10 @@ const buildFireFox = async () => {
           // id: 'syntaxright@gmail.com'
         }
       }
-    })
+    }),
+    isDev ? { spaces: 2 } : undefined
   )
 
-  fs.removeSync(path.join(firefoxDir, 'app'))
-  fs.removeSync(path.join(firefoxDir, 'zepto.min.js'))
-  fs.removeSync(path.join(firefoxDir, 'content_script.js'))
-  fs.removeSync(path.join(firefoxDir, 'inject.js'))
   fs.removeSync(path.join(firefoxDir, 'rules.json'))
 }
 
@@ -264,8 +290,8 @@ const zipPkg = async () => {
       }
     ],
 
-    ['src/background/firefox.ts', path.join(firefoxDir, 'background.js')]
-    // ['src/content_script/index.ts', path.join(firefoxDir, 'content_script.js')]
+    ['src/background/firefox.ts', path.join(firefoxDir, 'background.js')],
+    ['src/content_script/index.ts', path.join(firefoxDir, 'content_script.js')]
     // ['src/popup/index.ts', 'dist/popup.js']
   ]
 

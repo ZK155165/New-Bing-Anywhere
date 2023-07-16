@@ -13,7 +13,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.1.4",
     "@types/react-syntax-highlighter": "^15.5.7",
-    "antd": "^5.6.3",
+    "antd": "^5.6.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.10",
@@ -32,7 +32,7 @@
     "@vitejs/plugin-react-swc": "^3.3.2",
     "stylus": "^0.59.0",
     "typescript": "^5.1.6",
-    "vite": "^4.3.9",
+    "vite": "^4.4.2",
     "vite-plugin-imp": "^2.4.0",
     "vite-plugin-minify": "^1.5.2"
   }

@@ -1,4 +1,5 @@
-import { callBackground, getConfig } from '@@/utils'
+import { callBackground, checkIsGoogle, getConfig } from '@@/utils'
+import $ from 'jquery'
 import { extensionName } from '../../package.json'
 import bingHandler from './bing-handler'
 import chatHandler from './chat-handler'
@@ -16,15 +17,15 @@ import googleHandler from './google-handler'
 
   getConfig().then((config) => {
     if (config.showChat) {
-      chatHandler($, config)
+      chatHandler(config)
     }
   })
 
   if (location.hostname === 'www.bing.com') {
-    bingHandler($)
+    bingHandler()
   }
 
-  if (location.hostname.startsWith('www.google.')) {
-    googleHandler($)
+  if (checkIsGoogle()) {
+    googleHandler()
   }
-})(window.Zepto as ZeptoStatic)
+})($)
