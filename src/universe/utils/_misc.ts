@@ -205,7 +205,7 @@ export const escapeHtml = (s: string): string => {
 type IMethods = Record<string, (...args: any[]) => Promise<any>>
 export const registryListener = (callMethods: IMethods) => {
   chrome.runtime.onMessage.addListener((req, _sender, sendResponse) => {
-    (async () => {
+    ;(async () => {
       // if not return true immediately，will throw error `Unchecked runtime.lastError: The message port closed before a response was received.`
       try {
         const { method, args } = req
