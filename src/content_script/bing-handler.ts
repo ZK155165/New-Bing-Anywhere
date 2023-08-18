@@ -13,7 +13,7 @@ export default async () => {
   const isRtl = document.documentElement.dir === 'rtl'
 
   $(() => {
-    ;(async () => {
+    (async () => {
       const { showGuideToGithub } = await getConfig()
       if (!showGuideToGithub) return
       const $esatSwitch = $('#est_switch')
