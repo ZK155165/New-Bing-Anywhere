@@ -1,6 +1,5 @@
 import { type Bing } from '@@/types'
-
-import { v4 as uuidv4 } from 'uuid'
+import { callBackground } from '@@/utils'
 
 const pad0 = (n: number) => (n < 10 ? `0${n}` : `${n}`)
 
@@ -151,7 +150,7 @@ export const bingChatGetSocketId = async (): Promise<number> => {
     try {
       const ws = new WebSocket(socketUrl)
       const socketId = uid()
-      ws.onopen = (e) => {
+      ws.onopen = (_e) => {
         // console.log(`Connected to ${socketUrl}`)
         const hello = JSON.stringify({ protocol: 'json', version: 1 }) + '\x1e'
         ws.send(hello)
@@ -187,7 +186,7 @@ export const bingChatGetSocketId = async (): Promise<number> => {
 }
 
 export const bingChatPing = async (socketId: number) => {
-  return await new Promise((resolve, reject) => {
+  return await new Promise((resolve, _reject) => {
     const ws = webSockets[socketId]
     if (ws == null) throw new Error(`WebSocket ${socketId} not found`)
 
@@ -201,7 +200,7 @@ export const bingChatSend = async (
   msg: object,
   oMmessage: (data: Bing.Type1Data | Bing.Type2Data) => void
 ): Promise<Bing.Type2Data> => {
-  return await new Promise((resolve, reject) => {
+  return await new Promise((resolve, _reject) => {
     const ws = webSockets[socketId]
     if (ws == null) throw new Error(`WebSocket ${socketId} not found`)
 
@@ -229,21 +228,7 @@ export const bingChatCloseWebSocket = async (socketId: number) => {
 }
 
 export const getFromConversation = async (options: Bing.ConversationOptions): Promise<Bing.CoreData | null> => {
-  const API =
-    'https://sydney.bing.com/sydney/GetConversation?' +
-    `conversationId=${encodeURIComponent(options.session.conversationId)}&` +
-    `source=${encodeURIComponent(options.source)}&` +
-    `participantId=${encodeURIComponent(options.participantId)}&` +
-    `conversationSignature=${encodeURIComponent(options.session.conversationSignature)}&` +
-    `traceId=${uuidv4()}`
-  try {
-    const data = await fetch(API).then((r) => r.json())
-    return data
-  } catch (err: unknown) {
-    return null
-    // const { message } = err as { message: string }
-    // throw new Error(`Failed to get conversation from ${API}: ${message}}`)
-  }
+  return await callBackground('bing.getFromConversation', [options])
 }
 
 export const checkHasText = (data?: Partial<Bing.CoreData> | null | undefined) => {

@@ -1,9 +1,10 @@
 export const BING = 'https://www.bing.com/'
 export const CN_REDIRECT_URL = 'https://cn.bing.com/'
+export const AIPLUS = 'https://chat.aiplus.lol/login'
 export const BAND_MKTS = ['zh-CN', 'ru', 'ru-ru']
 
-export const MAIN_VERSION = '113'
-export const FULL_VERSION = '113.0.1774.57'
+export const MAIN_VERSION = '114'
+export const FULL_VERSION = '114.0.1823.82'
 
 export const ALL_RESOURCE_TYPES = [
   'csp_report',
@@ -191,6 +192,7 @@ export const GOOGLE_DOMAINS = [
   'google.mv',
   'google.mw',
   'google.ne',
+  'google.ng',
   'google.nl',
   'google.no',
   'google.nr',
@@ -224,6 +226,27 @@ export const GOOGLE_DOMAINS = [
   'google.vg',
   'google.vu',
   'google.ws'
+]
+
+export const YANDEX_DOMAINS = [
+  'yandex.com',
+  'yandex.ru',
+  'yandex.by',
+  'yandex.kz',
+  'yandex.uz',
+  'yandex.com.tr',
+  'yandex.fr',
+  'yandex.az',
+  'yandex.com.ge',
+  'yandex.com.am',
+  'yandex.co.il',
+  'yandex.lv',
+  'yandex.lt',
+  'yandex.ee',
+  'yandex.md',
+  'yandex.tm',
+  'yandex.tj',
+  'yandex.eu'
 ]
 
 export const OTHERS = ['duckduckgo.com', 'www.bing.com', 'www.ecosia.org', 'search.brave.com', 'www.baidu.com']

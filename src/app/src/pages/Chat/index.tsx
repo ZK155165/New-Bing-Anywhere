@@ -1,7 +1,6 @@
-import { type Scene } from '@@/types'
 import React, { useCallback, useEffect, type FC } from 'react'
 import { useParams } from 'react-router-dom'
-import Core from './Core'
+import Core, { type Scene } from './Core'
 import s from './chat.module.styl'
 
 interface NewtabWarpProps {
@@ -19,7 +18,15 @@ export default () => {
   const { scene = 'newtab' } = useParams<{ scene: Scene }>()
 
   const isNewtab = scene === 'newtab'
-
+  useEffect(() => {
+    ;(top ?? window).postMessage(
+      {
+        type: 'nba-ready',
+        data: true
+      },
+      '*'
+    )
+  }, [])
   const sendSize = useCallback(() => {
     const $body = document.body
     if (!$body) return

@@ -1,4 +1,5 @@
 import { getURL, version } from '@@/utils'
+import { bingChatCloseWebSocket, bingChatPing, getFromConversation as bingGetFromConversation } from './_bing'
 import { getNotification, hideNotification } from './_notification'
 
 const getEnv = async () => {
@@ -7,6 +8,7 @@ const getEnv = async () => {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const openUrlInSameTab = async ({ url }: { url: string } = {} as any) => {
   const tabs = await chrome.tabs.query({ currentWindow: true })
   const urlObj = getURL(url)
@@ -53,5 +55,9 @@ export default {
   openUrlInSameTab,
 
   getNotification,
-  hideNotification
+  hideNotification,
+
+  'bing.getFromConversation': bingGetFromConversation,
+  'bing.bingChatPing': bingChatPing,
+  'bing.bingChatCloseWebSocket': bingChatCloseWebSocket
 }
